@@ -1,0 +1,51 @@
+ame: Docker Build Develop
+
+on:
+  # develop branch에 push event가 발생할 경우 github action이 동작한다.
+  push: 
+    branches: [ "master" ]
+  # develop branch에 push event가 발생할 경우 github action이 동작한다.
+  # pull_request:
+  #   branches: [ "develop" ]
+    
+# env:
+#   # docker hub의 organization 이름
+#   REGISTRY: {Docker hub registry name}
+#   # build and push 할 docker image 이름
+#   IMAGE_NAME: {Docker image name}
+#   # build and push 할 docker image의 tag
+#   TAG: latest
+#   # docker push 명령어를 사용할 경우 login 이 필요합니다. 이를 구분하고 필요시에만 로그인하는 습관을 들이는 것이 보안상 좋다.
+#   IS_PUSH: ${{ github.event_name != 'pull_request' }}
+
+jobs:
+
+  build:
+    # 사용할 github action runner(github에서 제공하는 가상머신이라고 이해하면 될거 같다.)
+    runs-on: self-hosted
+
+    steps:
+    # - name: Checkout submodules
+    #   uses: actions/checkout@v3
+    #   with:
+    #     # 내 경우 submodule repo가 포함되어 있고, 해당 repo가 private이라 github access token이 추가로 필요했다.
+    #     submodules: recursive
+    #     # 여기서 사용되는 token은 github account settings에서 생성하고 github repo settings에서 설정한다.
+    #     token: ${{ secrets.ACTION_TOKEN }} 
+
+    # - name: Login to DockerHub
+    #   if: ${{ env.IS_PUSH }}
+    #   uses: docker/login-action@v1
+    #   with:
+    #     # docker hub login을 위해서 계정 정보를 github repo settings에 설정해 두었다.
+    #     username: ${{ secrets.DEV_DOCKER_ID }}
+    #     password: ${{ secrets.DEV_DOCKER_PW }}
+    
+    # 여기서 docker에서 제공하는 action이 있지만, 아래처럼 cli 명령어를 사용하는 것이 간편하여 그냥 사용하였다.
+    - uses: actions/checkout@v3
+    - name: Build the Docker image  
+      run: docker build . --file Dockerfile --tag test:latest
+      platform: linux/amd64
+
+    # - name: Push the Docker image
+    #   run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
